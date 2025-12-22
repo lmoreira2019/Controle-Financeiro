@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinancePro - Saldo & Persistência</title>
+    <title>FinancePro - Gestão Inteligente</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -12,27 +12,41 @@
 <div class="container">
     <section id="login-screen" class="card">
         <div class="avatar-box">
-            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#21262d"/><circle class="eye-ball" cx="35" cy="45" r="5" fill="#fff"/><circle class="eye-ball" cx="65" cy="45" r="5" fill="#fff"/><path d="M35 70 Q50 80 65 70" stroke="#fff" stroke-width="2" fill="none"/></svg>
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="#21262d"/>
+                <circle class="eye-ball" cx="35" cy="45" r="5" fill="#fff"/>
+                <circle class="eye-ball" cx="65" cy="45" r="5" fill="#fff"/>
+                <path d="M35 70 Q50 80 65 70" stroke="#fff" stroke-width="2" fill="none"/>
+            </svg>
         </div>
-        <h2 class="text-center">Acesso</h2>
+        <h2 class="text-center">Acesso ao Sistema</h2>
         <input type="text" id="login-user" placeholder="Usuário">
         <input type="password" id="login-pass" placeholder="Senha">
         <button class="btn btn-primary" onclick="auth.login()">Entrar</button>
-        <button class="btn btn-outline" onclick="auth.registrar()">Cadastrar Usuário</button>
+        <button class="btn btn-outline" onclick="auth.registrar()">Cadastrar Novo Usuário</button>
     </section>
 
     <main id="main-screen" class="hidden">
         <div class="summary">
-            <div class="summary-card"><small>Receitas</small><div class="val-rec" id="total-rec">R$ 0,00</div></div>
-            <div class="summary-card"><small>Despesas</small><div class="val-des" id="total-des">R$ 0,00</div></div>
-            <div class="summary-card full-width"><small>Saldo Geral</small><div class="val-bal" id="total-bal">R$ 0,00</div></div>
+            <div class="summary-card">
+                <small>Receitas no Filtro</small>
+                <div class="val-rec" id="total-rec">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+                <small>Despesas no Filtro</small>
+                <div class="val-des" id="total-des">R$ 0,00</div>
+            </div>
+            <div class="summary-card full-width">
+                <small>Saldo Geral Total</small>
+                <div class="val-bal" id="total-bal">R$ 0,00</div>
+            </div>
         </div>
 
         <section class="card">
             <h3 id="form-title">Novo Lançamento</h3>
             <input type="hidden" id="edit-id">
-            <input type="text" id="desc" placeholder="Descrição">
-            <input type="number" id="valor" placeholder="Valor R$">
+            <input type="text" id="desc" placeholder="Descrição (ex: Aluguel)">
+            <input type="number" id="valor" placeholder="Valor R$ (ex: 1250.50)">
             
             <div class="input-row">
                 <select id="tipo" onchange="ui.atualizarCategorias()">
@@ -44,13 +58,16 @@
             <select id="subcat"></select>
 
             <div class="input-row-date">
-                <div class="input-col"><label>Dia</label><input type="number" id="dia"></div>
+                <div class="input-col"><label>Dia</label><input type="number" id="dia" min="1" max="31"></div>
                 <div class="input-col">
                     <label>Mês</label>
                     <select id="mes">
-                        <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option>
-                        <option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option>
-                        <option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                        <option value="01">Jan</option><option value="02">Fev</option>
+                        <option value="03">Mar</option><option value="04">Abr</option>
+                        <option value="05">Mai</option><option value="06">Jun</option>
+                        <option value="07">Jul</option><option value="08">Ago</option>
+                        <option value="09">Set</option><option value="10">Out</option>
+                        <option value="11">Nov</option><option value="12">Dez</option>
                     </select>
                 </div>
                 <div class="input-col"><label>Ano</label><input type="number" id="ano"></div>
@@ -61,13 +78,15 @@
         <section class="card">
             <div class="filter-header">
                 <h3>Histórico</h3>
-                <select id="f-mes" onchange="financas.atualizar()"><option value="all">Tudo</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option></select>
+                <select id="f-periodo" onchange="financas.atualizar()">
+                    <option value="all">Todo o Período</option>
+                </select>
             </div>
             <div id="lista"></div>
         </section>
 
         <section class="card">
-            <h3>Distribuição</h3>
+            <h3>Gráfico de Despesas</h3>
             <div class="chart-container"><canvas id="chartArea"></canvas></div>
         </section>
         <button class="btn btn-outline" onclick="auth.logout()">Sair</button>

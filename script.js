@@ -1,15 +1,23 @@
 const ESTRUTURA = {
     "despesa": {
-        "🏠 Moradia": ["Aluguel", "Condomínio", "IPTU", "Água", "Luz", "Gás", "Manutenção"],
-        "🍽️ Alimentação": ["Supermercado", "Restaurantes", "Delivery"],
-        "🚗 Transporte": ["Combustível", "Uber", "Ônibus", "Seguro"],
-        "🏥 Saúde": ["Farmácia", "Plano de Saúde", "Consultas"],
-        "🎮 Lazer": ["Cinema", "Viagens", "Jogos"]
+        "🏠 Moradia": ["Aluguel", "Financiamento", "Condomínio", "IPTU", "Água", "Luz", "Gás", "Manutenção"],
+        "🍽️ Alimentação": ["Supermercado", "Feira", "Padaria", "Restaurantes", "Delivery"],
+        "🚗 Transporte": ["Combustível", "Estacionamento", "Pedágio", "Transporte Público", "Manutenção", "Seguro", "IPVA", "Multas"],
+        "📱 Comunicação": ["Internet Residencial", "Internet Móvel", "Plano Celular", "Streaming"],
+        "💳 Financeiro": ["Cartão Crédito", "Empréstimos", "Juros", "Tarifas Bancárias", "Financiamentos"],
+        "🏥 Saúde": ["Plano Saúde", "Consultas", "Exames", "Medicamentos", "Odontologia"],
+        "🎓 Educação": ["Escola/Faculdade", "Cursos", "Material Escolar", "Livros"],
+        "👕 Pessoais": ["Roupas", "Calçados", "Higiene", "Salão/Barbearia"],
+        "🎮 Lazer": ["Cinema", "Viagens", "Passeios", "Jogos", "Assinaturas"],
+        "🧾 Obrigações": ["Impostos", "Taxas", "Multas", "Pensão"],
+        "🎁 Outros": ["Presentes", "Doações", "Imprevistos"]
     },
     "receita": {
-        "💼 Trabalho": ["Salário", "Bônus"],
-        "📈 Investimentos": ["Dividendos", "Juros"],
-        "🧑‍💻 Renda Extra": ["Freelance", "Vendas"]
+        "💼 Trabalho": ["Salário", "Adiantamento", "Horas Extras", "Comissões", "Bônus"],
+        "🧑‍💻 Renda Extra": ["Freelance", "Serviços", "Vendas", "Bicos"],
+        "📈 Investimentos": ["Poupança", "Juros", "Dividendos", "Fundos"],
+        "🏠 Patrimônio": ["Aluguel Recebido", "Venda de Bens"],
+        "🎁 Outras": ["Reembolsos", "Prêmios", "Ajuda Familiar"]
     }
 };
 
@@ -28,7 +36,7 @@ const ui = {
         subCombo.innerHTML = (ESTRUTURA[tipo][cat] || []).map(s => `<option value="${s}">${s}</option>`).join('');
         if(subSel) subCombo.value = subSel;
     },
-    initData: () => {
+    resetData: () => {
         const h = new Date();
         document.getElementById('dia').value = String(h.getDate()).padStart(2, '0');
         document.getElementById('mes').value = String(h.getMonth() + 1).padStart(2, '0');
@@ -42,29 +50,27 @@ const auth = {
         const p = document.getElementById('login-pass').value.trim();
         if(!u || !p) return alert("Preencha usuário e senha!");
         localStorage.setItem('f_user', JSON.stringify({u, p}));
-        alert("Usuário Criado com Sucesso!");
+        alert("Usuário cadastrado com sucesso no aparelho!");
     },
     login: () => {
         const u = document.getElementById('login-user').value.trim();
         const p = document.getElementById('login-pass').value.trim();
         const saved = JSON.parse(localStorage.getItem('f_user'));
         if(saved && saved.u === u && saved.p === p) {
-            localStorage.setItem('f_sessao', 'true'); // Salva que está logado
-            auth.showMain();
-        } else alert("Usuário ou Senha incorretos!");
+            localStorage.setItem('f_sessao', 'true');
+            auth.mostrarDashboard();
+        } else alert("Dados incorretos!");
     },
     verificarSessao: () => {
-        if(localStorage.getItem('f_sessao') === 'true') auth.showMain();
+        if(localStorage.getItem('f_sessao') === 'true') auth.mostrarDashboard();
     },
-    showMain: () => {
+    mostrarDashboard: () => {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
+        financas.gerarOpcoesFiltro();
         financas.atualizar();
     },
-    logout: () => {
-        localStorage.removeItem('f_sessao');
-        location.reload();
-    }
+    logout: () => { localStorage.removeItem('f_sessao'); location.reload(); }
 };
 
 let myChart = null;
@@ -87,49 +93,64 @@ const financas = {
             data: `${ano}-${mes}-${dia}`
         };
 
-        if(!item.desc || isNaN(item.valor)) return alert("Dados inválidos!");
+        if(!item.desc || isNaN(item.valor)) return alert("Preencha tudo!");
 
-        let dados = JSON.parse(localStorage.getItem('f_data') || '[]');
-        id ? (dados = dados.map(d => d.id === item.id ? item : d)) : dados.push(item);
+        let d = JSON.parse(localStorage.getItem('f_data') || '[]');
+        id ? (d = d.map(x => x.id === item.id ? item : x)) : d.push(item);
         
-        localStorage.setItem('f_data', JSON.stringify(dados));
-        financas.limparForm();
+        localStorage.setItem('f_data', JSON.stringify(d));
+        financas.limpar();
+        financas.gerarOpcoesFiltro();
         financas.atualizar();
     },
-    limparForm: () => {
+    limpar: () => {
         document.getElementById('edit-id').value = '';
         document.getElementById('desc').value = '';
         document.getElementById('valor').value = '';
-        ui.initData(); // Reseta a data para hoje
+        ui.resetData();
         document.getElementById('form-title').innerText = 'Novo Lançamento';
+    },
+    gerarOpcoesFiltro: () => {
+        const d = JSON.parse(localStorage.getItem('f_data') || '[]');
+        const filtro = document.getElementById('f-periodo');
+        const valAtual = filtro.value;
+        const periodos = [...new Set(d.map(x => {
+            const [ano, mes] = x.data.split('-');
+            return `${mes}/${ano}`;
+        }))].sort().reverse();
+        
+        let opt = '<option value="all">Todo o Período</option>';
+        periodos.forEach(p => opt += `<option value="${p}">${p}</option>`);
+        filtro.innerHTML = opt;
+        filtro.value = valAtual || "all";
     },
     atualizar: () => {
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
-        const fM = document.getElementById('f-mes').value;
+        const fP = document.getElementById('f-periodo').value;
         
         d.sort((a,b) => new Date(a.data) - new Date(b.data));
-        
-        let rT = 0, dT = 0, sA = 0;
+        let sA = 0;
         const dComSaldo = d.map(x => {
             x.tipo === 'receita' ? sA += x.valor : sA -= x.valor;
             return {...x, sM: sA};
         });
 
-        const filtrados = dComSaldo.filter(x => fM === 'all' || x.data.split('-')[1] === fM);
+        const filtrados = dComSaldo.filter(i => fP === 'all' || `${i.data.split('-')[1]}/${i.data.split('-')[0]}` === fP);
+        let rT = 0, dT = 0;
         
         const html = [...filtrados].reverse().map(i => {
             i.tipo === 'receita' ? rT += i.valor : dT += i.valor;
             return `<div class="item">
                 <div><b>${i.desc}</b><small>${i.cat} > ${i.sub} | ${i.data.split('-').reverse().join('/')}</small></div>
                 <div class="actions">
-                    <span style="color:${i.tipo==='receita'?'#00d488':'#ff5f5f'}">${fmt(i.valor)}</span>
-                    <span class="saldo-linha">Saldo: ${fmt(i.sM)}</span>
-                    <button onclick="financas.remover(${i.id})" style="background:none;border:none;cursor:pointer">🗑️</button>
+                    <div><span class="valor-principal" style="color:${i.tipo==='receita'?'#00d488':'#ff5f5f'}">${fmt(i.valor)}</span>
+                    <span class="saldo-linha">Acum: ${fmt(i.sM)}</span></div>
+                    <button onclick="financas.remover(${i.id})">🗑️</button>
                 </div>
             </div>`;
         }).join('');
 
-        document.getElementById('lista').innerHTML = html || '<p class="text-center">Sem dados</p>';
+        document.getElementById('lista').innerHTML = html || '<p class="text-center">Sem dados.</p>';
         document.getElementById('total-rec').innerText = fmt(rT);
         document.getElementById('total-des').innerText = fmt(dT);
         document.getElementById('total-bal').innerText = fmt(sA);
@@ -140,6 +161,7 @@ const financas = {
         if(confirm("Excluir?")) {
             const d = JSON.parse(localStorage.getItem('f_data')).filter(x => x.id !== id);
             localStorage.setItem('f_data', JSON.stringify(d));
+            financas.gerarOpcoesFiltro();
             financas.atualizar();
         }
     },
@@ -154,4 +176,4 @@ const financas = {
     }
 };
 
-window.onload = () => { ui.initData(); ui.atualizarCategorias(); auth.verificarSessao(); };
+window.onload = () => { ui.resetData(); ui.atualizarCategorias(); auth.verificarSessao(); };
