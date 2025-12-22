@@ -4,6 +4,22 @@ Este é um projeto de gerenciamento financeiro pessoal desenvolvido para ser rá
 
 ---
 
+## 📸 Demonstração do Sistema
+
+### **Acesso e Segurança**
+Interface de autenticação simples e direta. O sistema foca na privacidade, mantendo seus dados salvos localmente.
+<img src="./login.png" width="100%" alt="Tela de Login">
+
+### **Dashboard Principal**
+Visão geral do saldo, receitas e despesas com filtros por período.
+<img src="./tela inicial.png" width="100%" alt="Tela Inicial">
+
+### **Gestão de Gastos e Gráficos**
+Histórico detalhado de lançamentos com ícones por categoria e gráfico de rosca para análise visual das despesas.
+<img src="./despesa.png" width="100%" alt="Gestão de Despesas">
+
+---
+
 ## 🚧 Projeto em Construção
 > **Aviso:** Este projeto ainda está em fase de criação e desenvolvimento. Algumas funcionalidades podem ser alteradas, aprimoradas ou adicionadas em breve.
 
