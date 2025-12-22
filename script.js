@@ -50,7 +50,8 @@ const auth = {
         const p = document.getElementById('login-pass').value.trim();
         if(!u || !p) return alert("Preencha usuário e senha!");
         localStorage.setItem('f_user', JSON.stringify({u, p}));
-        alert("Usuário cadastrado com sucesso no aparelho!");
+        alert("Usuário cadastrado com sucesso!");
+        auth.limparLogin();
     },
     login: () => {
         const u = document.getElementById('login-user').value.trim();
@@ -59,7 +60,15 @@ const auth = {
         if(saved && saved.u === u && saved.p === p) {
             localStorage.setItem('f_sessao', 'true');
             auth.mostrarDashboard();
-        } else alert("Dados incorretos!");
+        } else {
+            alert("Dados incorretos!");
+            auth.limparLogin(); // Limpa os campos em caso de erro
+        }
+    },
+    limparLogin: () => {
+        document.getElementById('login-user').value = '';
+        document.getElementById('login-pass').value = '';
+        document.getElementById('login-user').focus(); // Foca no primeiro campo
     },
     verificarSessao: () => {
         if(localStorage.getItem('f_sessao') === 'true') auth.mostrarDashboard();
@@ -93,22 +102,23 @@ const financas = {
             data: `${ano}-${mes}-${dia}`
         };
 
-        if(!item.desc || isNaN(item.valor)) return alert("Preencha tudo!");
+        if(!item.desc || isNaN(item.valor)) return alert("Preencha todos os campos!");
 
         let d = JSON.parse(localStorage.getItem('f_data') || '[]');
         id ? (d = d.map(x => x.id === item.id ? item : x)) : d.push(item);
         
         localStorage.setItem('f_data', JSON.stringify(d));
-        financas.limpar();
+        financas.limparForm();
         financas.gerarOpcoesFiltro();
         financas.atualizar();
     },
-    limpar: () => {
+    limparForm: () => {
         document.getElementById('edit-id').value = '';
         document.getElementById('desc').value = '';
         document.getElementById('valor').value = '';
         ui.resetData();
         document.getElementById('form-title').innerText = 'Novo Lançamento';
+        document.getElementById('desc').focus();
     },
     gerarOpcoesFiltro: () => {
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
@@ -145,20 +155,35 @@ const financas = {
                 <div class="actions">
                     <div><span class="valor-principal" style="color:${i.tipo==='receita'?'#00d488':'#ff5f5f'}">${fmt(i.valor)}</span>
                     <span class="saldo-linha">Acum: ${fmt(i.sM)}</span></div>
+                    <button onclick="financas.editar(${i.id})">✏️</button>
                     <button onclick="financas.remover(${i.id})">🗑️</button>
                 </div>
             </div>`;
         }).join('');
 
-        document.getElementById('lista').innerHTML = html || '<p class="text-center">Sem dados.</p>';
+        document.getElementById('lista').innerHTML = html || '<p class="text-center">Sem dados registrados.</p>';
         document.getElementById('total-rec').innerText = fmt(rT);
         document.getElementById('total-des').innerText = fmt(dT);
         document.getElementById('total-bal').innerText = fmt(sA);
         document.getElementById('total-bal').className = sA < 0 ? 'val-bal negativo' : 'val-bal';
         financas.grafico(filtrados);
     },
+    editar: (id) => {
+        const item = JSON.parse(localStorage.getItem('f_data')).find(x => x.id === id);
+        const [a, m, d] = item.data.split('-');
+        document.getElementById('edit-id').value = item.id;
+        document.getElementById('desc').value = item.desc;
+        document.getElementById('valor').value = item.valor;
+        document.getElementById('tipo').value = item.tipo;
+        ui.atualizarCategorias(item.cat, item.sub);
+        document.getElementById('dia').value = d; document.getElementById('mes').value = m; document.getElementById('ano').value = a;
+        document.getElementById('form-title').innerText = 'Editando Lançamento';
+        window.scrollTo(0,0);
+        document.getElementById('desc').focus();
+        document.getElementById('desc').select();
+    },
     remover: (id) => {
-        if(confirm("Excluir?")) {
+        if(confirm("Deseja excluir este lançamento?")) {
             const d = JSON.parse(localStorage.getItem('f_data')).filter(x => x.id !== id);
             localStorage.setItem('f_data', JSON.stringify(d));
             financas.gerarOpcoesFiltro();

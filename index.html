@@ -20,8 +20,8 @@
             </svg>
         </div>
         <h2 class="text-center">Acesso ao Sistema</h2>
-        <input type="text" id="login-user" placeholder="Usuário">
-        <input type="password" id="login-pass" placeholder="Senha">
+        <input type="text" id="login-user" placeholder="Usuário" onclick="this.select()">
+        <input type="password" id="login-pass" placeholder="Senha" onclick="this.select()">
         <button class="btn btn-primary" onclick="auth.login()">Entrar</button>
         <button class="btn btn-outline" onclick="auth.registrar()">Cadastrar Novo Usuário</button>
     </section>
@@ -45,8 +45,8 @@
         <section class="card">
             <h3 id="form-title">Novo Lançamento</h3>
             <input type="hidden" id="edit-id">
-            <input type="text" id="desc" placeholder="Descrição (ex: Aluguel)">
-            <input type="number" id="valor" placeholder="Valor R$ (ex: 1250.50)">
+            <input type="text" id="desc" placeholder="Descrição" onclick="this.select()">
+            <input type="number" id="valor" placeholder="Valor R$" onclick="this.select()">
             
             <div class="input-row">
                 <select id="tipo" onchange="ui.atualizarCategorias()">
@@ -58,7 +58,7 @@
             <select id="subcat"></select>
 
             <div class="input-row-date">
-                <div class="input-col"><label>Dia</label><input type="number" id="dia" min="1" max="31"></div>
+                <div class="input-col"><label>Dia</label><input type="number" id="dia" min="1" max="31" onclick="this.select()"></div>
                 <div class="input-col">
                     <label>Mês</label>
                     <select id="mes">
@@ -70,7 +70,7 @@
                         <option value="11">Nov</option><option value="12">Dez</option>
                     </select>
                 </div>
-                <div class="input-col"><label>Ano</label><input type="number" id="ano"></div>
+                <div class="input-col"><label>Ano</label><input type="number" id="ano" onclick="this.select()"></div>
             </div>
             <button class="btn btn-primary" onclick="financas.salvar()">Gravar Lançamento</button>
         </section>
