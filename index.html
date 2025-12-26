@@ -24,20 +24,21 @@
         <input type="password" id="login-pass" placeholder="Senha" onclick="this.select()">
         <button class="btn btn-primary" onclick="auth.login()">Entrar</button>
         <button class="btn btn-outline" onclick="auth.registrar()">Cadastrar Novo Usuário</button>
-       <div class="footer-info">
-        Versão 1.6 - 22/12/2025<br>
-        &copy; 2025 Lucas Ramos Moreira. Todos os direitos reservados.
-    </div>
+        
+        <div class="footer-info">
+            Versão 1.7 - 25/12/2025<br>
+            &copy; 2025 Lucas Moreira. Todos os direitos reservados.
+        </div>
     </section>
 
     <main id="main-screen" class="hidden">
         <div class="summary">
             <div class="summary-card">
-                <small>Receitas no Filtro</small>
+                <small>Receitas (Filtro)</small>
                 <div class="val-rec" id="total-rec">R$ 0,00</div>
             </div>
             <div class="summary-card">
-                <small>Despesas no Filtro</small>
+                <small>Despesas (Filtro)</small>
                 <div class="val-des" id="total-des">R$ 0,00</div>
             </div>
             <div class="summary-card full-width">
@@ -50,7 +51,7 @@
             <h3 id="form-title">Novo Lançamento</h3>
             <input type="hidden" id="edit-id">
             <input type="text" id="desc" placeholder="Descrição" onclick="this.select()">
-            <input type="number" id="valor" placeholder="Valor R$" onclick="this.select()">
+            <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="Valor R$ (ex: 10.50)" onclick="this.select()">
             
             <div class="input-row">
                 <select id="tipo" onchange="ui.atualizarCategorias()">
@@ -82,17 +83,22 @@
         <section class="card">
             <div class="filter-header">
                 <h3>Histórico</h3>
-                <select id="f-periodo" onchange="financas.atualizar()">
-                    <option value="all">Todo o Período</option>
-                </select>
+                <select id="f-periodo" onchange="financas.atualizar()"></select>
             </div>
-            <div id="lista"></div>
+            <input type="text" id="busca" placeholder="🔍 Buscar por nome..." onkeyup="financas.atualizar()" style="margin-top: 10px;">
+            <div id="lista" style="margin-top: 15px;"></div>
         </section>
 
         <section class="card">
-            <h3>Gráfico de Despesas</h3>
+            <h3>Gastos por Categoria</h3>
             <div class="chart-container"><canvas id="chartArea"></canvas></div>
         </section>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn btn-outline" onclick="util.exportar()" style="flex: 1; margin-top: 0;">📥 Exportar JSON</button>
+            <button class="btn btn-outline" onclick="util.importar()" style="flex: 1; margin-top: 0;">📤 Importar JSON</button>
+        </div>
+
         <button class="btn btn-outline" onclick="auth.logout()">Sair</button>
     </main>
 </div>

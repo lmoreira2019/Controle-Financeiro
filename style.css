@@ -8,8 +8,6 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var
 .container { width: 100%; max-width: 480px; padding: 15px; }
 .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 .avatar-box { width: 70px; margin: 0 auto 15px; }
-.eye-ball { transition: 0.2s; transform-origin: center 45px; }
-.eye-ball.closed { transform: scaleY(0.1); opacity: 0.5; }
 input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0d1117; border: 1px solid var(--border); border-radius: 10px; color: var(--text-main); font-size: 15px; outline: none; }
 input:focus { border-color: var(--accent); }
 .input-row, .input-row-date { display: flex; gap: 8px; }
@@ -30,26 +28,7 @@ input:focus { border-color: var(--accent); }
 .valor-principal { display: block; font-weight: 800; font-size: 1rem; }
 .saldo-linha { display: block; font-size: 10px; color: var(--text-sub); margin-top: 2px; }
 .actions button { background: #21262d; border: none; color: white; padding: 8px; border-radius: 8px; cursor: pointer; }
-.chart-container { height: 220px; width: 100%; position: relative; }
+.chart-container { min-height: 250px; width: 100%; position: relative; }
 .hidden { display: none !important; }
 .text-center { text-align: center; }
-
-/* Estilo para o rodapé da versão */
-.version-footer {
-    margin-top: 25px;
-    font-size: 11px;
-    color: var(--text-sub);
-    text-align: center;
-    opacity: 0.7;
-    font-weight: 500;
-}
-/* Rodapé de Login Ajustado */
-.footer-info {
-    margin-top: 25px;
-    text-align: center;
-    font-size: 10px; /* Fonte pequena e elegante */
-    color: var(--text-sub);
-    line-height: 1.6; /* Espaçamento entre as duas linhas */
-    opacity: 0.6;
-    font-weight: 400;
-}
+.footer-info { margin-top: 25px; text-align: center; font-size: 10px; color: var(--text-sub); line-height: 1.6; opacity: 0.6; }
