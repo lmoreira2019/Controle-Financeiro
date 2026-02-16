@@ -21,10 +21,10 @@
             </svg>
         </div>
         <h2 class="text-center">FinancePro</h2>
-        <input type="text" id="login-user" placeholder="Usuário" onclick="this.select()">
-        <input type="password" id="login-pass" placeholder="Senha" onclick="this.select()">
+        <input type="text" id="login-user" placeholder="Usuário">
+        <input type="password" id="login-pass" placeholder="Senha">
         <button class="btn btn-primary" onclick="auth.login()">Entrar</button>
-        <button class="btn btn-text" onclick="auth.registrar()">Criar nova conta</button>
+        <button class="btn btn-text" onclick="auth.registrar()">Criar conta</button>
     </section>
 
     <main id="main-screen" class="hidden">
@@ -47,8 +47,9 @@
             <section class="card">
                 <h3 id="form-title">Novo Lançamento</h3>
                 <input type="hidden" id="edit-id">
-                <input type="text" id="desc" placeholder="Descrição" onclick="this.select()">
-                <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="Valor R$">
+                <input type="text" id="desc" placeholder="Descrição">
+                <input type="number" id="valor" step="0.01" placeholder="Valor R$">
+                
                 <div class="input-row">
                     <select id="tipo" onchange="ui.atualizarCategorias()">
                         <option value="receita">💰 Receita</option>
@@ -57,15 +58,27 @@
                     <select id="cat" onchange="ui.atualizarSubcategorias()"></select>
                 </div>
                 <select id="subcat"></select>
+
                 <div class="input-row-date">
-                    <div class="input-col"><label>Dia</label><input type="number" id="dia"></div>
-                    <div class="input-col"><label>Mês</label>
+                    <div class="input-col">
+                        <label>Dia</label>
+                        <input type="number" id="dia" min="1" max="31" oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2);">
+                    </div>
+                    <div class="input-col">
+                        <label>Mês</label>
                         <select id="mes">
-                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
+                            <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
+                            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
+                            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
                         </select>
                     </div>
-                    <div class="input-col"><label>Ano</label><input type="number" id="ano"></div>
+                    <div class="input-col">
+                        <label>Ano</label>
+                        <input type="number" id="ano">
+                    </div>
                 </div>
+
                 <div class="status-container">
                     <label class="switch-label">
                         <input type="checkbox" id="status-pago" checked>
@@ -73,15 +86,16 @@
                         <span id="label-status-texto">Pago / Recebido</span>
                     </label>
                 </div>
+
                 <button class="btn btn-primary" onclick="financas.salvar()">Gravar</button>
             </section>
 
             <section class="card">
                 <div class="filter-header">
-                    <h3>Análise</h3>
+                    <h3>Análise de Gastos</h3>
                     <select id="tipo-grafico" onchange="financas.atualizar()">
-                        <option value="despesa">Gastos</option>
-                        <option value="receita">Ganhos</option>
+                        <option value="despesa">Despesas</option>
+                        <option value="receita">Receitas</option>
                     </select>
                 </div>
                 <div class="chart-container"><canvas id="chartArea"></canvas></div>
@@ -93,12 +107,12 @@
                 <h3>Histórico</h3>
                 <select id="f-periodo" onchange="financas.atualizar()"></select>
             </div>
-            <input type="text" id="busca" placeholder="🔍 Buscar lançamento..." onkeyup="financas.atualizar()">
+            <input type="text" id="busca" placeholder="🔍 Buscar..." onkeyup="financas.atualizar()">
             <div id="lista"></div>
         </section>
 
         <div class="action-buttons">
-            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Gerar PDF</button>
+            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Exportar PDF</button>
             <div class="grid-2">
                 <button class="btn btn-outline" onclick="util.exportar()">📥 Backup</button>
                 <button class="btn btn-outline" onclick="util.importar()">📤 Importar</button>
