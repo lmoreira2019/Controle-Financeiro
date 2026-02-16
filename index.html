@@ -25,25 +25,20 @@
         <input type="password" id="login-pass" placeholder="Senha" onclick="this.select()">
         <button class="btn btn-primary" onclick="auth.login()">Entrar</button>
         <button class="btn btn-text" onclick="auth.registrar()">Criar nova conta</button>
-        
-        <div class="footer-info">
-            Versão 2.0 - 2026<br>
-            &copy; Lucas Moreira.
-        </div>
     </section>
 
     <main id="main-screen" class="hidden">
         <div class="summary">
             <div class="summary-card">
-                <small>Receitas (Recebidas)</small>
+                <small>Recebidos (Mês)</small>
                 <div class="val-rec" id="total-rec">R$ 0,00</div>
             </div>
             <div class="summary-card">
-                <small>Despesas (Pagas)</small>
+                <small>Pagos (Mês)</small>
                 <div class="val-des" id="total-des">R$ 0,00</div>
             </div>
             <div class="summary-card full-width">
-                <small>Saldo Efetivado (Caixa Atual)</small>
+                <small>Saldo Efetivado (Total)</small>
                 <div class="val-bal" id="total-bal">R$ 0,00</div>
             </div>
         </div>
@@ -52,8 +47,7 @@
             <section class="card">
                 <h3 id="form-title">Novo Lançamento</h3>
                 <input type="hidden" id="edit-id">
-                
-                <input type="text" id="desc" placeholder="Descrição (ex: Aluguel)" onclick="this.select()">
+                <input type="text" id="desc" placeholder="Descrição" onclick="this.select()">
                 <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="Valor R$">
                 
                 <div class="input-row">
@@ -63,7 +57,6 @@
                     </select>
                     <select id="cat" onchange="ui.atualizarSubcategorias()"></select>
                 </div>
-                
                 <select id="subcat"></select>
 
                 <div class="input-row-date">
@@ -84,54 +77,44 @@
                     <label class="switch-label">
                         <input type="checkbox" id="status-pago" checked>
                         <span class="slider"></span>
-                        <span id="label-status-texto">Já foi pago/recebido?</span>
+                        <span id="label-status-texto">Marcar como Pago/Recebido</span>
                     </label>
                 </div>
 
-                <button class="btn btn-primary" onclick="financas.salvar()">Gravar Lançamento</button>
+                <button class="btn btn-primary" onclick="financas.salvar()">Gravar</button>
             </section>
 
             <section class="card">
                 <div class="filter-header">
-                    <h3>Análise Visual</h3>
+                    <h3>Análise</h3>
                     <select id="tipo-grafico" onchange="financas.atualizar()">
                         <option value="despesa">Gastos</option>
                         <option value="receita">Ganhos</option>
                     </select>
                 </div>
-                <div class="chart-container">
-                    <canvas id="chartArea"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="chartArea"></canvas></div>
             </section>
         </div>
 
         <section class="card">
             <div class="filter-header">
-                <h3>Histórico de Movimentações</h3>
-                <div class="filtros-topo">
-                    <select id="f-periodo" onchange="financas.atualizar()"></select>
-                </div>
+                <h3>Histórico</h3>
+                <select id="f-periodo" onchange="financas.atualizar()"></select>
             </div>
-            
-            <div class="search-box">
-                <input type="text" id="busca" placeholder="🔍 Buscar por descrição..." onkeyup="financas.atualizar()">
-            </div>
-            
-            <div id="lista" class="lista-transacoes">
-                </div>
+            <input type="text" id="busca" placeholder="🔍 Buscar..." onkeyup="financas.atualizar()">
+            <div id="lista"></div>
         </section>
 
         <div class="action-buttons">
-            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Exportar Relatório PDF</button>
+            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Gerar PDF</button>
             <div class="grid-2">
-                <button class="btn btn-outline" onclick="util.exportar()">📥 Backup Dados</button>
-                <button class="btn btn-outline" onclick="util.importar()">📤 Restaurar</button>
+                <button class="btn btn-outline" onclick="util.exportar()">📥 Backup</button>
+                <button class="btn btn-outline" onclick="util.importar()">📤 Importar</button>
             </div>
-            <button class="btn btn-danger-outline" onclick="auth.logout()">Encerrar Sessão</button>
+            <button class="btn btn-danger-outline" onclick="auth.logout()">Sair</button>
         </div>
     </main>
 </div>
-
 <script src="script.js"></script>
 </body>
 </html>
