@@ -32,15 +32,17 @@ input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0d1117; 
 input:checked + .slider { background-color: var(--success); }
 input:checked + .slider:before { transform: translateX(20px); }
 
-/* List */
+/* List Styles */
 .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: center; }
-.status-check { cursor: pointer; font-size: 18px; margin-right: 10px; }
-.pendente { opacity: 0.5; border-left: 3px solid var(--warning); padding-left: 10px; }
+.status-check { cursor: pointer; font-size: 1.2rem; margin-right: 12px; transition: transform 0.1s; }
+.status-check:active { transform: scale(1.2); }
+.pendente { opacity: 0.6; border-left: 3px solid var(--warning); padding-left: 10px; }
 .pago { border-left: 3px solid var(--success); padding-left: 10px; }
-.chart-container { min-height: 250px; }
+.actions { display: flex; align-items: center; gap: 10px; }
+.btn-text { background: transparent; border: none; cursor: pointer; font-size: 1.1rem; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.action-buttons { display: flex; flex-direction: column; gap: 10px; padding-bottom: 40px; }
 .hidden { display: none !important; }
+.text-center { text-align: center; }
 
 @media (min-width: 700px) {
     .container { max-width: 900px; }

@@ -119,9 +119,11 @@ const financas = {
         const filtrados = d.filter(i => (fP==='all' || `${i.data.split('-')[1]}/${i.data.split('-')[0]}`===fP) && i.desc.toLowerCase().includes(busca));
         
         document.getElementById('lista').innerHTML = [...filtrados].reverse().map(i => {
+            // SOMA PARA O DASHBOARD (Apenas o que está pago no período selecionado)
             if (i.pago) {
                 i.tipo === 'receita' ? rT += i.valor : dT += i.valor;
             }
+
             const statusIcon = i.pago ? '✅' : '⏳';
             const statusClass = i.pago ? 'pago' : 'pendente';
 
@@ -138,14 +140,15 @@ const financas = {
             </div>`;
         }).join('') || '<p class="text-center">Vazio.</p>';
 
-        const saldoTotal = d.reduce((acc, curr) => {
+        // CÁLCULO DO SALDO TOTAL HISTÓRICO (Tudo o que já foi efetivado)
+        const saldoEfetivado = d.reduce((acc, curr) => {
             if(!curr.pago) return acc;
             return curr.tipo === 'receita' ? acc + curr.valor : acc - curr.valor;
         }, 0);
 
         document.getElementById('total-rec').innerText = fmt(rT);
         document.getElementById('total-des').innerText = fmt(dT);
-        document.getElementById('total-bal').innerText = fmt(saldoTotal);
+        document.getElementById('total-bal').innerText = fmt(saldoEfetivado);
         financas.grafico(filtrados);
     },
     grafico: (dados) => {
@@ -177,12 +180,12 @@ const financas = {
 const util = {
     exportar: () => {
         const b = new Blob([localStorage.getItem('f_data') || '[]'], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup.json`; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup_financepro.json`; a.click();
     },
     importar: () => {
         const i = document.createElement('input'); i.type = 'file'; i.accept = '.json';
         i.onchange = e => {
-            const r = new FileReader(); r.onload = ev => { localStorage.setItem('f_data', ev.target.result); financas.atualizar(); };
+            const r = new FileReader(); r.onload = ev => { localStorage.setItem('f_data', ev.target.result); financas.gerarOpcoesFiltro(); financas.atualizar(); };
             r.readAsText(e.target.files[0]);
         };
         i.click();
@@ -191,9 +194,9 @@ const util = {
         const { jsPDF } = window.jspdf;
         const doc = jsPDF();
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
-        const body = d.map(i => [i.data, i.desc, i.tipo, i.pago?'SIM':'NÃO', fmtPDF(i.valor)]);
-        doc.autoTable({ head: [['Data', 'Desc', 'Tipo', 'Pago', 'Valor']], body });
-        doc.save('financepro.pdf');
+        const body = d.map(i => [i.data, i.desc, i.cat, i.pago ? 'PAGO' : 'PENDENTE', fmtPDF(i.valor)]);
+        doc.autoTable({ head: [['Data', 'Desc', 'Cat', 'Status', 'Valor']], body });
+        doc.save('financepro_relatorio.pdf');
     }
 };
 

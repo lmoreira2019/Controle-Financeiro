@@ -49,7 +49,6 @@
                 <input type="hidden" id="edit-id">
                 <input type="text" id="desc" placeholder="Descrição" onclick="this.select()">
                 <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="Valor R$">
-                
                 <div class="input-row">
                     <select id="tipo" onchange="ui.atualizarCategorias()">
                         <option value="receita">💰 Receita</option>
@@ -58,29 +57,22 @@
                     <select id="cat" onchange="ui.atualizarSubcategorias()"></select>
                 </div>
                 <select id="subcat"></select>
-
                 <div class="input-row-date">
                     <div class="input-col"><label>Dia</label><input type="number" id="dia"></div>
-                    <div class="input-col">
-                        <label>Mês</label>
+                    <div class="input-col"><label>Mês</label>
                         <select id="mes">
-                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
-                            <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
-                            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
-                            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
                         </select>
                     </div>
                     <div class="input-col"><label>Ano</label><input type="number" id="ano"></div>
                 </div>
-
                 <div class="status-container">
                     <label class="switch-label">
                         <input type="checkbox" id="status-pago" checked>
                         <span class="slider"></span>
-                        <span id="label-status-texto">Marcar como Pago/Recebido</span>
+                        <span id="label-status-texto">Pago / Recebido</span>
                     </label>
                 </div>
-
                 <button class="btn btn-primary" onclick="financas.salvar()">Gravar</button>
             </section>
 
@@ -101,7 +93,7 @@
                 <h3>Histórico</h3>
                 <select id="f-periodo" onchange="financas.atualizar()"></select>
             </div>
-            <input type="text" id="busca" placeholder="🔍 Buscar..." onkeyup="financas.atualizar()">
+            <input type="text" id="busca" placeholder="🔍 Buscar lançamento..." onkeyup="financas.atualizar()">
             <div id="lista"></div>
         </section>
 
