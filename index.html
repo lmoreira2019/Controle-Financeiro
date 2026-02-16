@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinancePro - Lucas Moreira</title>
+    <title>FinancePro - Gestão de Fluxo</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -27,24 +27,35 @@
         <button class="btn btn-text" onclick="auth.registrar()">Criar nova conta</button>
         
         <div class="footer-info">
-            Versão 1.9 - 25/12/2025<br>
-            &copy; 2025 Lucas Moreira. Todos os direitos reservados.
+            Versão 2.0 - 2026<br>
+            &copy; Lucas Moreira.
         </div>
     </section>
 
     <main id="main-screen" class="hidden">
         <div class="summary">
-            <div class="summary-card"><small>Receitas</small><div class="val-rec" id="total-rec">R$ 0,00</div></div>
-            <div class="summary-card"><small>Despesas</small><div class="val-des" id="total-des">R$ 0,00</div></div>
-            <div class="summary-card full-width"><small>Saldo Geral</small><div class="val-bal" id="total-bal">R$ 0,00</div></div>
+            <div class="summary-card">
+                <small>Receitas (Recebidas)</small>
+                <div class="val-rec" id="total-rec">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+                <small>Despesas (Pagas)</small>
+                <div class="val-des" id="total-des">R$ 0,00</div>
+            </div>
+            <div class="summary-card full-width">
+                <small>Saldo Efetivado (Caixa Atual)</small>
+                <div class="val-bal" id="total-bal">R$ 0,00</div>
+            </div>
         </div>
 
         <div class="main-grid">
             <section class="card">
                 <h3 id="form-title">Novo Lançamento</h3>
                 <input type="hidden" id="edit-id">
-                <input type="text" id="desc" placeholder="Descrição" onclick="this.select()">
+                
+                <input type="text" id="desc" placeholder="Descrição (ex: Aluguel)" onclick="this.select()">
                 <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="Valor R$">
+                
                 <div class="input-row">
                     <select id="tipo" onchange="ui.atualizarCategorias()">
                         <option value="receita">💰 Receita</option>
@@ -52,50 +63,75 @@
                     </select>
                     <select id="cat" onchange="ui.atualizarSubcategorias()"></select>
                 </div>
+                
                 <select id="subcat"></select>
+
                 <div class="input-row-date">
                     <div class="input-col"><label>Dia</label><input type="number" id="dia"></div>
-                    <div class="input-col"><label>Mês</label>
+                    <div class="input-col">
+                        <label>Mês</label>
                         <select id="mes">
-                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
+                            <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
+                            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
+                            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
                         </select>
                     </div>
                     <div class="input-col"><label>Ano</label><input type="number" id="ano"></div>
                 </div>
-                <button class="btn btn-primary" onclick="financas.salvar()">Gravar</button>
+
+                <div class="status-container">
+                    <label class="switch-label">
+                        <input type="checkbox" id="status-pago" checked>
+                        <span class="slider"></span>
+                        <span id="label-status-texto">Já foi pago/recebido?</span>
+                    </label>
+                </div>
+
+                <button class="btn btn-primary" onclick="financas.salvar()">Gravar Lançamento</button>
             </section>
 
             <section class="card">
                 <div class="filter-header">
-                    <h3>Análise</h3>
+                    <h3>Análise Visual</h3>
                     <select id="tipo-grafico" onchange="financas.atualizar()">
                         <option value="despesa">Gastos</option>
                         <option value="receita">Ganhos</option>
                     </select>
                 </div>
-                <div class="chart-container"><canvas id="chartArea"></canvas></div>
+                <div class="chart-container">
+                    <canvas id="chartArea"></canvas>
+                </div>
             </section>
         </div>
 
         <section class="card">
             <div class="filter-header">
-                <h3>Histórico</h3>
-                <select id="f-periodo" onchange="financas.atualizar()"></select>
+                <h3>Histórico de Movimentações</h3>
+                <div class="filtros-topo">
+                    <select id="f-periodo" onchange="financas.atualizar()"></select>
+                </div>
             </div>
-            <input type="text" id="busca" placeholder="🔍 Buscar lançamento..." onkeyup="financas.atualizar()">
-            <div id="lista"></div>
+            
+            <div class="search-box">
+                <input type="text" id="busca" placeholder="🔍 Buscar por descrição..." onkeyup="financas.atualizar()">
+            </div>
+            
+            <div id="lista" class="lista-transacoes">
+                </div>
         </section>
 
         <div class="action-buttons">
-            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Gerar Relatório PDF</button>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-outline" style="flex:1" onclick="util.exportar()">📥 Backup</button>
-                <button class="btn btn-outline" style="flex:1" onclick="util.importar()">📤 Importar</button>
+            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Exportar Relatório PDF</button>
+            <div class="grid-2">
+                <button class="btn btn-outline" onclick="util.exportar()">📥 Backup Dados</button>
+                <button class="btn btn-outline" onclick="util.importar()">📤 Restaurar</button>
             </div>
-            <button class="btn btn-danger-outline" onclick="auth.logout()">Sair</button>
+            <button class="btn btn-danger-outline" onclick="auth.logout()">Encerrar Sessão</button>
         </div>
     </main>
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
