@@ -32,6 +32,7 @@ const ui = {
         document.getElementById('dia').value = String(h.getDate()).padStart(2, '0');
         document.getElementById('mes').value = String(h.getMonth() + 1).padStart(2, '0');
         document.getElementById('ano').value = h.getFullYear();
+        document.getElementById('status-pago').checked = true; // Default pago
     }
 };
 
@@ -64,8 +65,6 @@ const auth = {
 
 let myChart = null;
 const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-// Função específica para PDF (Evita caracteres estranhos removendo o R$)
 const fmtPDF = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const financas = {
@@ -78,6 +77,7 @@ const financas = {
             tipo: document.getElementById('tipo').value,
             cat: document.getElementById('cat').value,
             sub: document.getElementById('subcat').value,
+            pago: document.getElementById('status-pago').checked,
             data: `${document.getElementById('ano').value}-${document.getElementById('mes').value}-${document.getElementById('dia').value.padStart(2,'0')}`
         };
         if(!item.desc || isNaN(item.valor)) return alert("Preencha todos os dados.");
@@ -93,6 +93,12 @@ const financas = {
         ui.resetData();
         document.getElementById('form-title').innerText = 'Novo Lançamento';
     },
+    alternarStatus: (id) => {
+        let d = JSON.parse(localStorage.getItem('f_data') || '[]');
+        d = d.map(x => x.id === id ? {...x, pago: !x.pago} : x);
+        localStorage.setItem('f_data', JSON.stringify(d));
+        financas.atualizar();
+    },
     gerarOpcoesFiltro: () => {
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
         const f = document.getElementById('f-periodo');
@@ -105,27 +111,47 @@ const financas = {
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
         const fP = document.getElementById('f-periodo').value;
         const busca = document.getElementById('busca').value.toLowerCase();
-        d.sort((a,b) => new Date(a.data) - new Date(b.data));
-        let sA = 0;
-        const dComS = d.map(x => { x.tipo==='receita' ? sA+=x.valor : sA-=x.valor; return {...x, sM: sA}; });
-        const filtrados = dComS.filter(i => (fP==='all' || `${i.data.split('-')[1]}/${i.data.split('-')[0]}`===fP) && i.desc.toLowerCase().includes(busca));
         
-        let rT = 0, dT = 0;
+        d.sort((a,b) => new Date(a.data) - new Date(b.data));
+        
+        let sA = 0; // Saldo Acumulado Efetivado
+        let rT = 0, dT = 0; // Totais do período filtrado
+
+        const filtrados = d.filter(i => (fP==='all' || `${i.data.split('-')[1]}/${i.data.split('-')[0]}`===fP) && i.desc.toLowerCase().includes(busca));
+        
         document.getElementById('lista').innerHTML = [...filtrados].reverse().map(i => {
-            i.tipo === 'receita' ? rT += i.valor : dT += i.valor;
-            return `<div class="item">
-                <div><b>${i.desc}</b><small>${i.cat} | ${i.data.split('-').reverse().join('/')}</small></div>
+            // Soma para o resumo apenas se estiver PAGO
+            if (i.pago) {
+                i.tipo === 'receita' ? rT += i.valor : dT += i.valor;
+            }
+
+            const statusIcon = i.pago ? '✅' : '⏳';
+            const statusClass = i.pago ? 'pago' : 'pendente';
+
+            return `<div class="item ${statusClass}">
+                <div style="display:flex; align-items:center;">
+                    <span class="status-check" onclick="financas.alternarStatus(${i.id})" title="Alterar status">${statusIcon}</span>
+                    <div><b>${i.desc}</b><br><small>${i.cat} | ${i.data.split('-').reverse().join('/')}</small></div>
+                </div>
                 <div class="actions">
-                    <div style="text-align:right"><span style="color:${i.tipo==='receita'?'#34d399':'#ff5f5f'}"><b>${fmt(i.valor)}</b></span><br><small>Acum: ${fmt(i.sM)}</small></div>
+                    <div style="text-align:right">
+                        <span style="color:${i.tipo==='receita'?'#34d399':'#ff5f5f'}"><b>${fmt(i.valor)}</b></span>
+                    </div>
                     <button onclick="financas.editar(${i.id})">✏️</button>
                     <button onclick="financas.remover(${i.id})">🗑️</button>
                 </div>
             </div>`;
         }).join('') || '<p class="text-center">Vazio.</p>';
 
+        // Cálculo do saldo total histórico (apenas o que foi pago/recebido)
+        const saldoEfetivado = d.reduce((acc, curr) => {
+            if(!curr.pago) return acc;
+            return curr.tipo === 'receita' ? acc + curr.valor : acc - curr.valor;
+        }, 0);
+
         document.getElementById('total-rec').innerText = fmt(rT);
         document.getElementById('total-des').innerText = fmt(dT);
-        document.getElementById('total-bal').innerText = fmt(sA);
+        document.getElementById('total-bal').innerText = fmt(saldoEfetivado);
         financas.grafico(filtrados);
     },
     grafico: (dados) => {
@@ -145,6 +171,7 @@ const financas = {
         document.getElementById('desc').value = item.desc;
         document.getElementById('valor').value = item.valor;
         document.getElementById('tipo').value = item.tipo;
+        document.getElementById('status-pago').checked = item.pago ?? true;
         ui.atualizarCategorias(item.cat, item.sub);
         const [a, m, d] = item.data.split('-');
         document.getElementById('dia').value = d; document.getElementById('mes').value = m; document.getElementById('ano').value = a;
@@ -169,50 +196,39 @@ const util = {
     gerarPDF: () => {
         const { jsPDF } = window.jspdf;
         const doc = jsPDF({ orientation: "p", unit: "mm", format: "a4" });
-        
         const fP = document.getElementById('f-periodo').value;
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
         const filtrados = d.filter(i => fP === 'all' || `${i.data.split('-')[1]}/${i.data.split('-')[0]}` === fP).sort((a,b) => new Date(a.data) - new Date(b.data));
         
-        // Cabeçalho - Usando texto simples sem R$ para evitar erro de encoding
         doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
         doc.text("RELATORIO FINANCEPRO", 14, 20);
         
-        doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.text(`Periodo: ${fP} | Gerado em: ${new Date().toLocaleDateString()}`, 14, 28);
         
         let tr = 0, td = 0;
         const body = filtrados.map(i => {
-            i.tipo === 'receita' ? tr += i.valor : td += i.valor;
-            // Removemos emojis e usamos nomes limpos para o PDF
-            const catLimpa = i.cat.replace(/[^\w\s]/gi, '').trim(); 
+            if(i.pago) i.tipo === 'receita' ? tr += i.valor : td += i.valor;
+            const statusTxt = i.pago ? 'OK' : 'PEND';
             return [
                 i.data.split('-').reverse().join('/'), 
                 i.desc, 
-                catLimpa, 
                 i.tipo === 'receita' ? 'REC' : 'DES', 
+                statusTxt,
                 fmtPDF(i.valor)
             ];
         });
 
         doc.autoTable({ 
             startY: 35, 
-            head: [['Data', 'Descricao', 'Categoria', 'Tipo', 'Valor (R$)']], 
+            head: [['Data', 'Descricao', 'Tipo', 'Status', 'Valor (R$)']], 
             body: body, 
-            headStyles: {fillColor: [88, 166, 255]},
-            styles: { font: "helvetica", fontSize: 9 }
+            headStyles: {fillColor: [88, 166, 255]}
         });
         
         const finalY = doc.lastAutoTable.finalY + 10;
-        doc.setFont("helvetica", "bold");
-        doc.text(`Resumo Financeiro (R$):`, 14, finalY);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Total Receitas: ${fmtPDF(tr)}`, 14, finalY + 7);
-        doc.text(`Total Despesas: ${fmtPDF(td)}`, 14, finalY + 14);
-        doc.text(`Saldo Final: ${fmtPDF(tr-td)}`, 14, finalY + 21);
-        
+        doc.text(`Total Efetivado: ${fmtPDF(tr-td)}`, 14, finalY);
         doc.save(`relatorio_${fP.replace('/','-')}.pdf`);
     }
 };
