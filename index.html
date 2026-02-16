@@ -24,7 +24,7 @@
         <input type="text" id="login-user" placeholder="Usuário">
         <input type="password" id="login-pass" placeholder="Senha">
         <button class="btn btn-primary" onclick="auth.login()">Entrar</button>
-        <button class="btn btn-text" onclick="auth.registrar()">Criar conta</button>
+        <button class="btn btn-text" onclick="auth.registrar()">Criar nova conta</button>
     </section>
 
     <main id="main-screen" class="hidden">
@@ -48,7 +48,7 @@
                 <h3 id="form-title">Novo Lançamento</h3>
                 <input type="hidden" id="edit-id">
                 <input type="text" id="desc" placeholder="Descrição">
-                <input type="number" id="valor" step="0.01" placeholder="Valor R$">
+                <input type="number" id="valor" step="0.01" inputmode="decimal" placeholder="Valor R$">
                 
                 <div class="input-row">
                     <select id="tipo" onchange="ui.atualizarCategorias()">
@@ -57,6 +57,7 @@
                     </select>
                     <select id="cat" onchange="ui.atualizarSubcategorias()"></select>
                 </div>
+                
                 <select id="subcat"></select>
 
                 <div class="input-row-date">
@@ -73,10 +74,7 @@
                             <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
                         </select>
                     </div>
-                    <div class="input-col">
-                        <label>Ano</label>
-                        <input type="number" id="ano">
-                    </div>
+                    <div class="input-col"><label>Ano</label><input type="number" id="ano"></div>
                 </div>
 
                 <div class="status-container">
@@ -92,10 +90,10 @@
 
             <section class="card">
                 <div class="filter-header">
-                    <h3>Análise de Gastos</h3>
+                    <h3>Análise</h3>
                     <select id="tipo-grafico" onchange="financas.atualizar()">
-                        <option value="despesa">Despesas</option>
-                        <option value="receita">Receitas</option>
+                        <option value="despesa">Gastos</option>
+                        <option value="receita">Ganhos</option>
                     </select>
                 </div>
                 <div class="chart-container"><canvas id="chartArea"></canvas></div>
@@ -107,12 +105,12 @@
                 <h3>Histórico</h3>
                 <select id="f-periodo" onchange="financas.atualizar()"></select>
             </div>
-            <input type="text" id="busca" placeholder="🔍 Buscar..." onkeyup="financas.atualizar()">
+            <input type="text" id="busca" placeholder="🔍 Buscar lançamento..." onkeyup="financas.atualizar()">
             <div id="lista"></div>
         </section>
 
         <div class="action-buttons">
-            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Exportar PDF</button>
+            <button class="btn btn-primary" onclick="util.gerarPDF()">📄 Gerar PDF</button>
             <div class="grid-2">
                 <button class="btn btn-outline" onclick="util.exportar()">📥 Backup</button>
                 <button class="btn btn-outline" onclick="util.importar()">📤 Importar</button>

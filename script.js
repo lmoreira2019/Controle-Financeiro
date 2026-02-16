@@ -32,7 +32,6 @@ const ui = {
     },
     resetData: () => {
         const h = new Date();
-        // GARANTE 2 DÍGITOS NO DIA
         document.getElementById('dia').value = String(h.getDate()).padStart(2, '0');
         document.getElementById('mes').value = String(h.getMonth() + 1).padStart(2, '0');
         document.getElementById('ano').value = h.getFullYear();
@@ -48,14 +47,14 @@ const auth = {
         if(saved && saved.u === u && saved.p === p) {
             localStorage.setItem('f_sessao', 'true');
             auth.mostrarDashboard();
-        } else { alert("Usuário ou senha incorretos."); }
+        } else { alert("Acesso inválido."); }
     },
     registrar: () => {
         const u = document.getElementById('login-user').value.trim();
         const p = document.getElementById('login-pass').value.trim();
         if(!u || !p) return alert("Preencha os campos.");
         localStorage.setItem('f_user', JSON.stringify({u, p}));
-        alert("Conta criada com sucesso!");
+        alert("Conta cadastrada!");
     },
     mostrarDashboard: () => {
         document.getElementById('login-screen').classList.add('hidden');
@@ -72,8 +71,6 @@ let myChart = null;
 const financas = {
     salvar: () => {
         const id = document.getElementById('edit-id').value;
-        const diaInput = document.getElementById('dia').value;
-        
         const item = {
             id: id ? parseInt(id) : Date.now(),
             desc: document.getElementById('desc').value.trim(),
@@ -82,16 +79,12 @@ const financas = {
             cat: document.getElementById('cat').value,
             sub: document.getElementById('subcat').value,
             pago: document.getElementById('status-pago').checked,
-            // FORMATAÇÃO DO DIA COM 2 DÍGITOS NO SALVAMENTO
-            data: `${document.getElementById('ano').value}-${document.getElementById('mes').value}-${diaInput.toString().padStart(2, '0')}`
+            data: `${document.getElementById('ano').value}-${document.getElementById('mes').value}-${document.getElementById('dia').value.toString().padStart(2, '0')}`
         };
-
-        if(!item.desc || isNaN(item.valor)) return alert("Preencha os campos obrigatórios.");
-        
+        if(!item.desc || isNaN(item.valor)) return alert("Preencha todos os dados.");
         let d = JSON.parse(localStorage.getItem('f_data') || '[]');
         id ? (d = d.map(x => x.id === item.id ? item : x)) : d.push(item);
         localStorage.setItem('f_data', JSON.stringify(d));
-        
         financas.limparForm(); financas.gerarOpcoesFiltro(); financas.atualizar();
     },
     alternarStatus: (id) => {
@@ -126,7 +119,6 @@ const financas = {
         const filtrados = d.filter(i => (fP==='all' || `${i.data.split('-')[1]}/${i.data.split('-')[0]}`===fP) && i.desc.toLowerCase().includes(busca));
         
         document.getElementById('lista').innerHTML = [...filtrados].reverse().map(i => {
-            // SOMA SOMENTE SE ESTIVER PAGO
             if (i.pago) {
                 i.tipo === 'receita' ? rT += i.valor : dT += i.valor;
             }
@@ -145,16 +137,16 @@ const financas = {
                     <button class="btn-text" onclick="financas.remover(${i.id})">🗑️</button>
                 </div>
             </div>`;
-        }).join('') || '<p class="text-center">Sem lançamentos.</p>';
+        }).join('') || '<p class="text-center">Vazio.</p>';
 
-        const saldoReal = d.reduce((acc, curr) => {
+        const saldoEfetivado = d.reduce((acc, curr) => {
             if(!curr.pago) return acc;
             return curr.tipo === 'receita' ? acc + curr.valor : acc - curr.valor;
         }, 0);
 
         document.getElementById('total-rec').innerText = fmt(rT);
         document.getElementById('total-des').innerText = fmt(dT);
-        document.getElementById('total-bal').innerText = fmt(saldoReal);
+        document.getElementById('total-bal').innerText = fmt(saldoEfetivado);
         financas.grafico(filtrados);
     },
     grafico: (dados) => {
@@ -178,34 +170,30 @@ const financas = {
         ui.atualizarCategorias(item.cat, item.sub);
         const [a, m, d] = item.data.split('-');
         document.getElementById('dia').value = d; document.getElementById('mes').value = m; document.getElementById('ano').value = a;
-        document.getElementById('form-title').innerText = 'Editar Lançamento'; window.scrollTo(0,0);
+        document.getElementById('form-title').innerText = 'Editando...'; window.scrollTo(0,0);
     },
-    remover: (id) => { if(confirm("Deseja apagar este registro?")) { const d = JSON.parse(localStorage.getItem('f_data')).filter(x => x.id !== id); localStorage.setItem('f_data', JSON.stringify(d)); financas.gerarOpcoesFiltro(); financas.atualizar(); } }
+    remover: (id) => { if(confirm("Excluir?")) { const d = JSON.parse(localStorage.getItem('f_data')).filter(x => x.id !== id); localStorage.setItem('f_data', JSON.stringify(d)); financas.gerarOpcoesFiltro(); financas.atualizar(); } }
 };
 
 const util = {
     exportar: () => {
-        const data = localStorage.getItem('f_data') || '[]';
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `backup_financepro.json`; a.click();
+        const b = new Blob([localStorage.getItem('f_data') || '[]'], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup_financepro.json`; a.click();
     },
     importar: () => {
-        const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            const reader = new FileReader(); 
-            reader.onload = ev => { localStorage.setItem('f_data', ev.target.result); financas.gerarOpcoesFiltro(); financas.atualizar(); };
-            reader.readAsText(file);
+        const i = document.createElement('input'); i.type = 'file'; i.accept = '.json';
+        i.onchange = e => {
+            const r = new FileReader(); r.onload = ev => { localStorage.setItem('f_data', ev.target.result); financas.gerarOpcoesFiltro(); financas.atualizar(); };
+            r.readAsText(e.target.files[0]);
         };
-        input.click();
+        i.click();
     },
     gerarPDF: () => {
         const { jsPDF } = window.jspdf;
         const doc = jsPDF();
         const d = JSON.parse(localStorage.getItem('f_data') || '[]');
-        const rows = d.map(i => [i.data.split('-').reverse().join('/'), i.desc, i.cat, i.pago ? 'SIM' : 'NÃO', fmtPDF(i.valor)]);
-        doc.autoTable({ head: [['Data', 'Desc', 'Categoria', 'Pago', 'Valor']], body: rows });
+        const rows = d.map(i => [i.data.split('-').reverse().join('/'), i.desc, i.cat, i.pago ? 'PAGO' : 'PENDENTE', fmtPDF(i.valor)]);
+        doc.autoTable({ head: [['Data', 'Desc', 'Categoria', 'Status', 'Valor']], body: rows });
         doc.save('financepro_relatorio.pdf');
     }
 };
